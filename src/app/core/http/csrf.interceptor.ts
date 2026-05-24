@@ -4,7 +4,7 @@ const MUTATING = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 
 /**
  * Reads the CSRF token from the `csrftoken` cookie set by the backend on login
- * and attaches it as the `X-CSRF-Token` header on every mutating request.
+ * and attaches compatibility headers on every mutating request.
  */
 export const csrfInterceptor: HttpInterceptorFn = (req, next) => {
   if (!MUTATING.has(req.method.toUpperCase())) {
@@ -18,7 +18,10 @@ export const csrfInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(
     req.clone({
-      setHeaders: { 'X-CSRF-Token': token },
+      setHeaders: {
+        'X-CSRFToken': token,
+        'X-CSRF-Token': token,
+      },
     }),
   );
 };
