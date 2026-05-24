@@ -12,6 +12,7 @@ RUN sed -i "s|apiBaseUrl: '.*'|apiBaseUrl: '${API_BASE_URL}'|g" src/environments
 RUN pnpm build --configuration production
 
 FROM nginx:1.27-alpine AS runtime
+COPY nginx/default.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/dist/nexo-agent/browser /usr/share/nginx/html
 
 EXPOSE 80
