@@ -118,10 +118,34 @@ export class SalvavidasComponent implements OnInit, OnDestroy {
   );
   /** Combined boost factor applied to the base cupo. */
   readonly combinedMult = computed(() => this.multTemporal() * this.ajusteGeo());
-  /** True when multipliers pushed raw_cupo above the segment cap. */
+  // ── Authoritative flags from the API (no client-side inference) ─────────────
+  /** True when the multiplied raw_cupo actually crossed the tier cap. */
   readonly rawExceedsCap = computed(
-    () => this.rawCupo() > 0 && this.cupoFinal() > 0 && this.rawCupo() > this.cupoFinal(),
+    () => this.offer()?.breakdown?.raw_exceeds_tier_cap === true,
   );
+  /** True when the regulatory cap was applied to produce cupo_pre_ml. */
+  readonly capApplied = computed(
+    () => this.offer()?.breakdown?.cap_applied === true,
+  );
+  /** True when the ML risk model further reduced cupo_pre_ml → cupo_final. */
+  readonly mlReducedCupo = computed(
+    () => this.offer()?.breakdown?.ml_reduced_cupo === true,
+  );
+  /** Cupo after deuda + cap but before ML adjustment (fallback to raw). */
+  readonly cupoPreMl = computed(
+    () => this.offer()?.breakdown?.cupo_pre_ml ?? this.rawCupo(),
+  );
+  /** ML risk factor as a decimal (e.g. 0.85). */
+  readonly mlRiskFactor = computed(
+    () => this.offer()?.breakdown?.ml_risk_factor ?? 1,
+  );
+  /** ML reduction expressed as a percentage (e.g. 15 = 15% off). */
+  readonly mlReductionPct = computed(() => {
+    const pre = this.cupoPreMl();
+    const final = this.cupoFinal();
+    if (pre <= 0 || final <= 0 || pre <= final) return 0;
+    return Math.round(((pre - final) / pre) * 100);
+  });
   readonly scoreBase = computed(
     () => this.offer()?.scoring?.score_base ?? this.scoring()?.score_base ?? 0,
   );

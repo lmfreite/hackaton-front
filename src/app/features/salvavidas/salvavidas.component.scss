@@ -475,6 +475,16 @@
   color: var(--color-on-primary);
 }
 
+.amp-connector--ml .amp-connector__track {
+  background: linear-gradient(to bottom, var(--color-outline-variant), #0891b2);
+}
+
+.amp-connector__pill--ml {
+  background: rgba(8, 145, 178, 0.12);
+  color: #0e7490;
+  border: 1px solid rgba(8, 145, 178, 0.25);
+}
+
 // ── Score detail accordion ───────────────────────────────────────────────────
 .score-accordion {
   display: flex;

@@ -97,8 +97,9 @@ export interface OfferBreakdown {
   mult_temporal: number;    // temporal multiplier applied
   ajuste_geo: number;       // geographic adjustment factor
   deuda_activa: number;
-  raw_cupo: number;         // cupo before regulatory cap
-  cupo_final: number;       // cupo after cap  ← use this as the credit limit
+  raw_cupo: number;         // gross cupo after multipliers, before deuda & cap
+  cupo_pre_ml?: number;     // cupo after deuda subtraction and tier cap, before ML
+  cupo_final: number;       // final cupo after ML risk adjustment  ← credit limit
   amount_min: number;       // minimum disbursable amount
   amount_default: number;   // pre-selected default amount
   term_days: number;        // credit term in calendar days (e.g. 45)
@@ -106,6 +107,16 @@ export interface OfferBreakdown {
   installment_amount: number; // single cuota for cupo_final; scale for other amounts
   sector_min: number;
   sector_max: number;
+
+  // ── New explanatory flags from the API ──────────────────────────────────────
+  /** Set when raw_cupo crossed the segment's tier_cap (e.g. 15M). */
+  raw_exceeds_tier_cap?: boolean;
+  /** Set when the regulatory cap was applied to produce cupo_pre_ml. */
+  cap_applied?: boolean;
+  /** Set when the ML risk model further reduced cupo_pre_ml → cupo_final. */
+  ml_reduced_cupo?: boolean;
+  /** ML risk factor in [0..1] — multiplied against cupo_pre_ml. */
+  ml_risk_factor?: number;
 }
 
 /** Scoring sub-document embedded inside the offer */

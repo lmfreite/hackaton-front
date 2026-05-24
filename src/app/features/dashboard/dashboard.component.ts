@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } 
 import { DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { AccountService } from '../../core/services/account.service';
-import { DashboardService, DashboardOverview } from '../../core/services/dashboard.service';
+import { DashboardService, DashboardOverview, ForecastHistoryItem } from '../../core/services/dashboard.service';
 import { Transaction, AccountSummary } from '../../core/models/transaction.model';
 import { CardComponent } from '../../shared/ui/card/card.component';
 import { ButtonComponent } from '../../shared/ui/button/button.component';
@@ -54,24 +54,53 @@ export class DashboardComponent implements OnInit {
   readonly rateDiscountPct = computed(() => this.overviewData()?.offer?.rate_discount_pct ?? null);
 
   ngOnInit(): void {
-    // Try the real Nexo dashboard overview first; if it fails (or shape is partial),
-    // fall back to the local mock so the demo never shows empty state.
     this.dashboardSvc.getOverview().subscribe((remote) => {
       if (remote && Object.keys(remote).length > 0) {
         this.account.set(this.mapOverview(remote));
         this.loadingAccount.set(false);
+
+        // Prefer real history from forecast.history; fall back to mock.
+        const history = remote.forecast?.history ?? [];
+        if (history.length > 0) {
+          this.transactions.set(this.mapHistory(history));
+          this.loadingTx.set(false);
+        } else {
+          this.loadMockTransactions();
+        }
       } else {
         this.accountSvc.getAccount().subscribe((a) => {
           this.account.set(a);
           this.loadingAccount.set(false);
         });
+        this.loadMockTransactions();
       }
     });
+  }
 
+  private loadMockTransactions(): void {
     this.accountSvc.getRecentTransactions().subscribe((tx) => {
       this.transactions.set(tx);
       this.loadingTx.set(false);
     });
+  }
+
+  /** Maps ForecastHistoryItems to the Transaction shape used by the table. */
+  private mapHistory(items: ForecastHistoryItem[]): Transaction[] {
+    return items.slice(0, 8).map((item) => ({
+      id: item.id,
+      fecha: new Date(item.created_at),
+      descripcion: item.description || item.channel,
+      categoria: item.channel,
+      monto: Number(item.amount),
+      signo: item.type === 'ingreso' ? 'ingreso' : 'egreso',
+      estado: this.mapStatus(item.status),
+    }));
+  }
+
+  private mapStatus(s: string): 'completada' | 'pendiente' | 'rechazada' {
+    if (s === 'posted')  return 'completada';
+    if (s === 'pending') return 'pendiente';
+    return 'rechazada'; // reversed | failed
   }
 
   /**

@@ -327,8 +327,8 @@
                 </div>
               </div>
 
-              <!-- Step 2: raw cupo (only when it blows past the cap) -->
-              @if (rawExceedsCap()) {
+              <!-- Step 2: raw cupo amplificado — only when cap was applied -->
+              @if (capApplied()) {
                 <div class="amp-step">
                   <div class="amp-step__marker amp-step__marker--raw"></div>
                   <div class="amp-step__body">
@@ -343,6 +343,28 @@
                   <div class="amp-connector__pill amp-connector__pill--cap">
                     <app-icon name="verified_user" [size]="12" />
                     Tope del segmento · máx {{ s.cupo_base_max | currencyCop }}
+                  </div>
+                </div>
+              }
+
+              <!-- Step 2b: cupo_pre_ml (only when ML reduced it below cap) -->
+              @if (mlReducedCupo()) {
+                <div class="amp-step">
+                  <div class="amp-step__marker amp-step__marker--raw"></div>
+                  <div class="amp-step__body">
+                    <span class="amp-step__label">
+                      @if (capApplied()) { Después del tope } @else { Cupo bruto }
+                    </span>
+                    <strong class="amp-step__amount amp-step__amount--muted">
+                      {{ cupoPreMl() | currencyCop }}
+                    </strong>
+                  </div>
+                </div>
+                <div class="amp-connector amp-connector--ml">
+                  <div class="amp-connector__track"></div>
+                  <div class="amp-connector__pill amp-connector__pill--ml">
+                    <app-icon name="psychology" [size]="12" />
+                    Ajuste IA por riesgo · −{{ mlReductionPct() }}%
                   </div>
                 </div>
               }

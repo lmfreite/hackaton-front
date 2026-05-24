@@ -34,6 +34,32 @@ export interface OverviewOffer {
   cupo_base_max?: number;
 }
 
+/** Single transaction inside the forecast.history array of the overview. */
+export interface ForecastHistoryItem {
+  id: string;
+  type: 'ingreso' | 'egreso' | string;
+  status: 'posted' | 'pending' | 'reversed' | 'failed' | string;
+  amount: number;
+  currency?: string;
+  channel: string;
+  description: string;
+  reference_id?: string;
+  external_id?: string;
+  balance_before?: number;
+  balance_after?: number;
+  is_reversal?: boolean;
+  is_credit_disbursement?: boolean;
+  created_at: string; // ISO-8601
+}
+
+export interface ForecastHistory {
+  pyme_id?: string;
+  user_id?: string;
+  window_days?: number;
+  history: ForecastHistoryItem[];
+  [key: string]: unknown;
+}
+
 export interface DashboardOverview {
   pyme_id?: string;
   razon_social?: string;
@@ -42,6 +68,7 @@ export interface DashboardOverview {
   offer?: OverviewOffer;
   ai_summary?: string;          // ← agent's personalised credit announcement
   products_recommended?: unknown[];
+  forecast?: ForecastHistory;   // ← history embedded in the overview response
   // kept for backward compat / fallback fields
   saldo_total?: number;
   moneda?: string;

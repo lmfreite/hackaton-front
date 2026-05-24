@@ -247,6 +247,7 @@ export class SalvavidasService {
         ajuste_geo: num(bd.ajuste_geo),
         deuda_activa: num(bd.deuda_activa),
         raw_cupo: num(bd.raw_cupo),
+        cupo_pre_ml: bd.cupo_pre_ml != null ? num(bd.cupo_pre_ml) : undefined,
         cupo_final: num(bd.cupo_final),
         amount_min: num(bd.amount_min),
         amount_default: num(bd.amount_default),
@@ -255,6 +256,10 @@ export class SalvavidasService {
         installment_amount: num(bd.installment_amount),
         sector_min: num(bd.sector_min),
         sector_max: num(bd.sector_max),
+        raw_exceeds_tier_cap: bd.raw_exceeds_tier_cap ?? false,
+        cap_applied: bd.cap_applied ?? false,
+        ml_reduced_cupo: bd.ml_reduced_cupo ?? false,
+        ml_risk_factor: bd.ml_risk_factor != null ? num(bd.ml_risk_factor) : undefined,
       },
       scoring: data.scoring
         ? {
