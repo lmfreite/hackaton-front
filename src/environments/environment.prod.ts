@@ -1,4 +1,5 @@
 export const environment = {
   production: true,
-  apiBaseUrl: 'https://api-nexo.stampedev.cloud',
+  // Requests go to /api/... on the same origin; nginx proxies them to the API.
+  apiBaseUrl: '',
 };
