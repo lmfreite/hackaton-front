@@ -1,0 +1,174 @@
+<section class="page">
+  <header class="page__header">
+    <div>
+      <p class="page__eyebrow">
+        {{ razonSocial() ?? 'Distribuciones Vargas SAS' }} · NIT 900.111.222-3
+      </p>
+      <h1 class="page__title">Cuenta de ahorros empresarial</h1>
+    </div>
+    <div class="page__actions">
+      <app-button variant="ghost" icon="download">Exportar</app-button>
+      <app-button variant="secondary" icon="bolt" routerLink="/asesor">
+        Hablar con el Asesor IA
+      </app-button>
+    </div>
+  </header>
+
+  <!-- Banner horizontal Salvavidas -->
+  <a routerLink="/salvavidas" class="ai-banner anim-fade-up anim-delay-1">
+    <div class="ai-banner__left">
+      <span class="ai-banner__badge">
+        <app-icon name="auto_awesome" [size]="14" />
+        Agente Salvavidas · IA
+        @if (ratePreferential()) {
+          &nbsp;· Tasa preferencial
+        }
+      </span>
+      <h3 class="ai-banner__title">
+        @if (offerCupo()) {
+          Cupo pre-aprobado de {{ offerCupo()! | currencyCop }}
+        } @else {
+          Oferta pre-aprobada lista para tu Pyme
+        }
+      </h3>
+      @if (offerRateEA() && offerTermDays()) {
+        <p class="ai-banner__meta">
+          {{ offerRateEA()! | number: '1.2-2' }}% E.A. · {{ offerTermDays() }} días
+          @if (rateDiscountPct()) {
+            · <span class="ai-banner__discount">–{{ rateDiscountPct()! | number: '1.0-1' }}% vs tasa estándar</span>
+          }
+        </p>
+      }
+    </div>
+    <p class="ai-banner__copy">
+      {{ aiSummary() ?? 'Detectamos tu cupo de capital de trabajo con base en tu comportamiento bancario, temporada y zona geográfica. Desembolso en menos de 2 minutos.' }}
+    </p>
+    <span class="ai-banner__cta">
+      Activar mi cupo
+      <app-icon name="arrow_forward" [size]="18" />
+    </span>
+  </a>
+
+  <!-- KPIs en 3 columnas -->
+  <div class="grid">
+    <app-card class="grid__balance anim-fade-up anim-delay-2">
+      <header class="balance__head">
+        <div>
+          <span class="label-sm">Saldo total</span>
+          <span class="balance__account">Cta: {{ account()?.numeroCuenta ?? '—' }}</span>
+        </div>
+        <span class="trend trend--up">
+          <app-icon name="trending_up" [size]="14" />
+          +{{ account()?.variacionPct ?? 0 }}%
+        </span>
+      </header>
+
+      <div class="balance__amount">
+        @if (loadingAccount()) {
+          <app-skeleton width="280px" height="48px" />
+        } @else {
+          <h2 class="balance__value">{{ account()!.saldoTotal | currencyCop }}</h2>
+          <span class="balance__currency">{{ account()!.moneda }}</span>
+        }
+      </div>
+
+      <div class="balance__actions">
+        <app-button variant="primary" icon="swap_horiz" routerLink="/transferencias">
+          Nueva transferencia
+        </app-button>
+        <app-button variant="ghost" icon="receipt_long" routerLink="/recibos">
+          Ver recibos
+        </app-button>
+      </div>
+    </app-card>
+
+    <app-card class="grid__pending anim-fade-up anim-delay-3">
+      <span class="label-sm">Aprobaciones pendientes</span>
+      <div class="kpi">
+        @if (loadingAccount()) {
+          <app-skeleton width="60px" height="40px" />
+        } @else {
+          <strong class="kpi__value">{{ account()!.aprobacionesPendientes }}</strong>
+        }
+        <a class="kpi__link" routerLink="/transferencias">Revisar</a>
+      </div>
+    </app-card>
+
+    <app-card class="grid__expenses anim-fade-up anim-delay-4">
+      <span class="label-sm">Gastos del mes</span>
+      <div class="kpi">
+        @if (loadingAccount()) {
+          <app-skeleton width="140px" height="40px" />
+        } @else {
+          <strong class="kpi__value">${{ formatCompact(account()!.gastosMensuales) }}</strong>
+          <span class="trend trend--down">
+            <app-icon name="trending_down" [size]="14" />
+            {{ account()!.variacionGastosPct }}%
+          </span>
+        }
+      </div>
+    </app-card>
+  </div>
+
+  <!-- Transacciones recientes -->
+  <app-card class="anim-fade-up anim-delay-4" [flush]="true">
+    <header class="tx-head">
+      <div>
+        <h3 class="tx-head__title">Transacciones recientes</h3>
+        <p class="tx-head__subtitle">Movimientos de los últimos 7 días</p>
+      </div>
+      <a routerLink="/transferencias" class="tx-head__link">
+        Ver todas
+        <app-icon name="arrow_forward" [size]="16" />
+      </a>
+    </header>
+
+    <div class="tx-table" role="table">
+      <div class="tx-table__head" role="row">
+        <span role="columnheader">Fecha</span>
+        <span role="columnheader">Descripción</span>
+        <span role="columnheader">Categoría</span>
+        <span role="columnheader" class="tx-table__right">Monto</span>
+        <span role="columnheader">Estado</span>
+      </div>
+
+      @if (loadingTx()) {
+        @for (i of [1, 2, 3, 4]; track i) {
+          <div class="tx-table__row" role="row">
+            <app-skeleton width="100px" />
+            <app-skeleton width="180px" />
+            <app-skeleton width="110px" />
+            <app-skeleton width="120px" />
+            <app-skeleton width="100px" />
+          </div>
+        }
+      } @else {
+        @for (tx of transactions(); track tx.id; let i = $index) {
+          <div
+            class="tx-table__row anim-fade-up"
+            [style.animation-delay.ms]="i * 60"
+            role="row"
+          >
+            <span class="tx-table__date" role="cell">{{ tx.fecha | shortDateEs }}</span>
+            <span class="tx-table__desc" role="cell">{{ tx.descripcion }}</span>
+            <span role="cell">
+              <span class="cat-pill">{{ tx.categoria }}</span>
+            </span>
+            <span
+              class="tx-table__amount tx-table__right"
+              [class.tx-table__amount--in]="tx.signo === 'ingreso'"
+              role="cell"
+            >
+              {{ tx.signo === 'ingreso' ? '+' : '-' }}{{ tx.monto | currencyCop }}
+            </span>
+            <span role="cell">
+              <app-status-chip [tone]="chipTone(tx.estado)" [icon]="chipIcon(tx.estado)">
+                {{ statusLabel(tx.estado) }}
+              </app-status-chip>
+            </span>
+          </div>
+        }
+      }
+    </div>
+  </app-card>
+</section>

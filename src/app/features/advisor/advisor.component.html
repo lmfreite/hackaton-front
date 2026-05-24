@@ -1,0 +1,143 @@
+<section class="page">
+  <header class="page__header">
+    <div>
+      <p class="page__eyebrow">Capa 1 · Captación inteligente</p>
+      <h1 class="page__title">Asesor financiero IA</h1>
+      <p class="page__subtitle">
+        Conversa naturalmente. El agente entiende tu situación financiera y te recomienda el
+        producto exacto que necesitas.
+      </p>
+    </div>
+    <div class="page__meta">
+      @if (leadCaptured()) {
+        <app-status-chip tone="success" icon="check_circle">Lead capturado</app-status-chip>
+      } @else {
+        <app-status-chip tone="primary" icon="auto_awesome">Sesión activa</app-status-chip>
+      }
+      <button class="reset-btn" (click)="reset()">
+        <app-icon name="refresh" [size]="16" />
+        Reiniciar
+      </button>
+    </div>
+  </header>
+
+  <div class="chat-grid">
+    <app-card class="chat" [flush]="true">
+      <div class="chat__head">
+        <div class="chat__head-avatar">
+          <app-icon name="smart_toy" [size]="22" color="var(--color-on-primary)" />
+        </div>
+        <div>
+          <strong>Sofía · Asesora IA</strong>
+          <span class="chat__status">
+            <span class="dot dot--online"></span>
+            En línea · responde en ~1s
+          </span>
+        </div>
+      </div>
+
+      <div #scroller class="chat__stream">
+        @for (msg of messages(); track msg.id) {
+          <div class="bubble-row" [class.bubble-row--user]="msg.role === 'user'">
+            @if (msg.role === 'agent') {
+              <div class="bubble-row__avatar">
+                <app-icon name="smart_toy" [size]="18" color="var(--color-on-primary)" />
+              </div>
+            }
+            <div class="bubble" [class.bubble--user]="msg.role === 'user'">
+              <p class="bubble__text">{{ msg.content }}</p>
+
+              @if (msg.productCard) {
+                <div class="product-card">
+                  <div class="product-card__head">
+                    <app-icon name="auto_awesome" [size]="16" color="var(--color-secondary)" />
+                    <span>Recomendación</span>
+                  </div>
+                  <h3 class="product-card__title">{{ msg.productCard.nombre }}</h3>
+                  <p class="product-card__desc">{{ msg.productCard.descripcion }}</p>
+                  <ul class="product-card__bullets">
+                    @for (b of msg.productCard.beneficios; track b) {
+                      <li>
+                        <app-icon name="check" [size]="14" color="var(--color-success)" />
+                        {{ b }}
+                      </li>
+                    }
+                  </ul>
+                  @if (msg.productCard.tasa) {
+                    <span class="product-card__rate">{{ msg.productCard.tasa }}</span>
+                  }
+                  <app-button variant="primary" icon="bolt" [block]="true">
+                    {{ msg.productCard.cta }}
+                  </app-button>
+                </div>
+              }
+
+              @if (msg.quickReplies?.length) {
+                <div class="quick-replies">
+                  @for (qr of msg.quickReplies!; track qr) {
+                    <button class="qr-pill" (click)="selectQuickReply(qr)">{{ qr }}</button>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        @if (typing()) {
+          <div class="bubble-row">
+            <div class="bubble-row__avatar">
+              <app-icon name="smart_toy" [size]="18" color="var(--color-on-primary)" />
+            </div>
+            <div class="bubble bubble--typing">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+            </div>
+          </div>
+        }
+      </div>
+
+      <form class="chat__composer" (ngSubmit)="onSubmit()">
+        <input
+          type="text"
+          [ngModel]="draft()"
+          (ngModelChange)="draft.set($event)"
+          name="msg"
+          placeholder="Escribe tu mensaje…"
+          autocomplete="off"
+        />
+        <button type="submit" class="send-btn" [disabled]="!draft().trim()" aria-label="Enviar">
+          <app-icon name="send" [size]="18" color="white" />
+        </button>
+      </form>
+    </app-card>
+
+    <aside class="side-panel anim-fade-up anim-delay-2">
+      <app-card>
+        <header class="panel__head">
+          <app-icon name="psychology" [size]="20" color="var(--color-primary)" />
+          <h3>¿Cómo trabaja Sofía?</h3>
+        </header>
+        <ol class="panel__steps">
+          <li><span>1</span> Perfilado conversacional</li>
+          <li><span>2</span> Scoring de interés y riesgo</li>
+          <li><span>3</span> Recomendación personalizada</li>
+          <li><span>4</span> Captura del lead calificado</li>
+        </ol>
+      </app-card>
+
+      <app-card>
+        <header class="panel__head">
+          <app-icon name="verified" [size]="20" color="var(--color-success)" />
+          <h3>Catálogo conectado</h3>
+        </header>
+        <ul class="panel__list">
+          <li><strong>Crédito Salvavidas Pyme</strong> · Capital de trabajo</li>
+          <li><strong>Cuenta Súper Ahorro</strong> · Rendimiento mensual</li>
+          <li><strong>Tarjeta Black</strong> · Beneficios premium</li>
+          <li><strong>Seguro Patrimonio</strong> · Hogar y vida</li>
+        </ul>
+      </app-card>
+    </aside>
+  </div>
+</section>

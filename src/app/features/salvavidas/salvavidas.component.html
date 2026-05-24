@@ -1,0 +1,489 @@
+<section class="page">
+  <header class="page__header">
+    <div>
+      <p class="page__eyebrow">
+        <app-icon name="auto_awesome" [size]="14" />
+        Salvavidas Pyme · Powered by Nexo
+      </p>
+      <h1 class="page__title">Tu cupo de capital de trabajo, en vivo</h1>
+      <p class="page__subtitle">
+        El agente Nexo evalúa tu comportamiento, tu zona y la temporada actual contra los endpoints
+        productivos de Serfinanza para entregarte un cupo en menos de 2 minutos.
+      </p>
+    </div>
+    <app-status-chip tone="primary" icon="bolt">Agente Nexo activo</app-status-chip>
+  </header>
+
+  <!-- ── Identity banner: shown as soon as razonSocial is known ── -->
+  @if (razonSocial()) {
+    <div class="identity anim-fade-up">
+      <div class="identity__bullet"></div>
+      <div class="identity__copy">
+        <strong>{{ razonSocial() }}</strong>
+        <span>
+          {{ segmentLabel(offerSegment()) }}
+          @if (offerSector()) { · Sector {{ offerSector() }} }
+          · Score base {{ scoreBase() | number: '1.0-1' }}/100
+        </span>
+      </div>
+      @if (user(); as u) {
+        <div class="identity__user">
+          <app-icon name="person" [size]="16" color="rgba(255,255,255,0.7)" />
+          {{ u.Fullname }} · {{ u.Email }}
+        </div>
+      }
+    </div>
+  }
+
+  <!-- ── Analyzing ── -->
+  @if (stage() === 'analyzing') {
+    <app-card class="analyzing anim-fade-up">
+      <div class="analyzing__hero">
+        <div class="analyzing__spinner"></div>
+        <h2>Construyendo tu oferta en tiempo real…</h2>
+        <p>Consultamos scoring, calendario y geografía contra la API Nexo.</p>
+      </div>
+      <ul class="analyzing__steps">
+        @for (step of analyzingSteps; track step.label; let i = $index) {
+          <li class="anim-fade-up" [style.animation-delay.ms]="i * 200">
+            <app-icon [name]="step.icon" [size]="18" color="var(--color-primary)" />
+            {{ step.label }}
+          </li>
+        }
+      </ul>
+    </app-card>
+  }
+
+  <!-- ── Error ── -->
+  @if (stage() === 'error') {
+    <app-card class="analyzing anim-fade-up">
+      <div class="analyzing__hero">
+        <app-icon name="error" [size]="40" color="var(--color-secondary)" />
+        <h2>No pudimos calcular tu oferta</h2>
+        <p>{{ errorMessage() }}</p>
+      </div>
+      <app-button variant="primary" icon="refresh" (click)="resetFlow()">
+        Reintentar
+      </app-button>
+    </app-card>
+  }
+
+  <!-- ── Offer / Confirming ── -->
+  @if ((stage() === 'offer' || stage() === 'confirming') && hasContext()) {
+    <div class="offer-grid">
+
+      <!-- Left: offer card -->
+      <app-card class="offer-card anim-scale-in">
+        <header class="offer-card__head">
+          <div>
+            <span class="label-sm">Cupo pre-aprobado</span>
+            <h2 class="offer-card__amount">{{ selectedAmount() | currencyCop }}</h2>
+            <p class="offer-card__pyme">{{ razonSocial() }}</p>
+          </div>
+          <span class="tramo-pill tramo-pill--{{ offerSegment() }}">
+            {{ segmentLabel(offerSegment()) }}
+          </span>
+        </header>
+
+        <!-- Personalised agent message -->
+        @if (offerMessage()) {
+          <div class="offer-card__message">
+            <app-icon name="chat" [size]="20" color="var(--color-secondary)" />
+            <p>{{ offerMessage() }}</p>
+          </div>
+        }
+
+        <!-- Amount slider -->
+        <div class="slider">
+          <div class="slider__head">
+            <span>Ajusta tu monto</span>
+            <span class="slider__hint">Máximo {{ cupoFinal() | currencyCop }}</span>
+          </div>
+          <input
+            type="range"
+            [min]="cupoMin()"
+            [max]="cupoFinal()"
+            [step]="50000"
+            [ngModel]="selectedAmount()"
+            (ngModelChange)="onAmountChange($event)"
+            class="slider__input"
+            [style.--progress.%]="progressPct()"
+          />
+          <div class="slider__scale">
+            <span>{{ cupoMin() | currencyCop }}</span>
+            <span>{{ cupoFinal() | currencyCop }}</span>
+          </div>
+        </div>
+
+        <!-- Financial terms — mapped from real API fields -->
+        <div class="terms">
+          <div class="terms__item">
+            <span class="label-sm">Plazo</span>
+            <strong>{{ termDays() }} días</strong>
+          </div>
+          <div class="terms__item">
+            <span class="label-sm">Cuota estimada</span>
+            <strong>{{ cuotaMensual() | currencyCop }}</strong>
+          </div>
+          <div class="terms__item">
+            <span class="label-sm">Tasa E.A.</span>
+            <strong>{{ rateEA() | number: '1.2-3' }}%</strong>
+          </div>
+        </div>
+
+        <app-button
+          variant="primary"
+          icon="bolt"
+          [block]="true"
+          [loading]="stage() === 'accepting'"
+          [disabled]="!offer()?.offer_id || stage() === 'accepting'"
+          (click)="confirmDisbursement()"
+        >
+          {{ stage() === 'accepting' ? 'Procesando…' : 'Activar y desembolsar ahora' }}
+        </app-button>
+
+        <div class="offer-card__meta">
+          @if (expiresAt()) {
+            <p class="offer-card__footnote">
+              <app-icon name="schedule" [size]="14" color="var(--color-on-surface-variant)" />
+              Oferta válida hasta {{ expiresAt() | date: 'dd/MM/yyyy HH:mm' }}
+            </p>
+          }
+          <p class="offer-card__footnote">
+            <app-icon name="lock" [size]="14" color="var(--color-on-surface-variant)" />
+            Operación supervisada por la Superintendencia Financiera de Colombia.
+          </p>
+        </div>
+      </app-card>
+
+      <!-- Right: context stack -->
+      <div class="context-stack">
+
+        <!-- Calendar context -->
+        @if (calendar(); as c) {
+          <app-card class="context-card">
+            <header class="context-card__head">
+              <app-icon name="event" [size]="20" color="var(--color-primary)" />
+              <h3>Contexto temporal</h3>
+              <span class="multiplier-tag">×{{ multTemporal() | number: '1.2-2' }}</span>
+            </header>
+            @if (c.events_active.length) {
+              <div class="badge-list">
+                @for (e of c.events_active; track e.name; let i = $index) {
+                  <app-badge
+                    [label]="'×' + (e.multiplier | number: '1.2-2')"
+                    [value]="e.name"
+                    icon="celebration"
+                    [pulse]="i === 0"
+                  />
+                }
+              </div>
+            } @else {
+              <p class="context-card__empty">Día sin eventos especiales activos.</p>
+            }
+            @if (c.cap_reached) {
+              <p class="context-card__note">{{ c.cap_note }}</p>
+            }
+          </app-card>
+        }
+
+        <!-- Geo context -->
+        @if (geo(); as g) {
+          <app-card class="context-card">
+            <header class="context-card__head">
+              <app-icon name="public" [size]="20" color="var(--color-primary)" />
+              <h3>Contexto geográfico</h3>
+              <span class="multiplier-tag">×{{ ajusteGeo() | number: '1.2-2' }}</span>
+            </header>
+            <div class="geo-grid">
+              <div>
+                <span class="label-sm">Zona</span>
+                <strong>{{ g.zone.name }}</strong>
+              </div>
+              @if (g.zone.city || g.zone.department) {
+                <div>
+                  <span class="label-sm">Ubicación</span>
+                  <strong>
+                    {{ g.zone.city }}@if (g.zone.city && g.zone.department) {, }{{ g.zone.department }}
+                  </strong>
+                </div>
+              }
+              @if (g.zone.region) {
+                <div>
+                  <span class="label-sm">Región</span>
+                  <strong>{{ g.zone.region }}</strong>
+                </div>
+              }
+              @if (g.local_events.length) {
+                <div>
+                  <span class="label-sm">Evento local</span>
+                  <strong>{{ g.local_events[0].name }}</strong>
+                </div>
+              }
+              <div>
+                <span class="label-sm">Factor de riesgo</span>
+                <strong>×{{ g.zone.risk_factor | number: '1.2-2' }}</strong>
+              </div>
+              @if (g.zone.cycle_mult && g.zone.cycle_mult !== 1) {
+                <div>
+                  <span class="label-sm">Ciclo económico</span>
+                  <strong>×{{ g.zone.cycle_mult | number: '1.2-2' }}</strong>
+                </div>
+              }
+            </div>
+          </app-card>
+        }
+
+        <!-- ── Cupo journey (score → amplificado → final) ── -->
+        @if (scoringCtx(); as s) {
+          <app-card class="context-card">
+            <header class="context-card__head">
+              <app-icon name="leaderboard" [size]="20" color="var(--color-primary)" />
+              <h3>Cómo se construyó tu cupo</h3>
+              <span class="score-pill">{{ s.score_base | number: '1.0-0' }}/100</span>
+            </header>
+
+            <div class="amp-flow">
+
+              <!-- Step 1: score base → cupo base -->
+              <div class="amp-step">
+                <div class="amp-step__marker amp-step__marker--score">
+                  <span class="amp-step__score-num">{{ s.score_base | number: '1.0-0' }}</span>
+                </div>
+                <div class="amp-step__body">
+                  <span class="amp-step__label">
+                    Score base · {{ s.cupo_base_min | currencyCop }}–{{ s.cupo_base_max | currencyCop }}
+                  </span>
+                  <strong class="amp-step__amount">{{ s.cupo_base | currencyCop }}</strong>
+                </div>
+              </div>
+
+              <!-- Connector: combined multiplier -->
+              <div class="amp-connector">
+                <div class="amp-connector__track"></div>
+                <div class="amp-connector__pill">
+                  <app-icon name="bolt" [size]="12" />
+                  ×{{ combinedMult() | number: '1.2-2' }} · temporada + zona
+                </div>
+              </div>
+
+              <!-- Step 2: raw cupo (only when it blows past the cap) -->
+              @if (rawExceedsCap()) {
+                <div class="amp-step">
+                  <div class="amp-step__marker amp-step__marker--raw"></div>
+                  <div class="amp-step__body">
+                    <span class="amp-step__label">Amplificado · supera el tope</span>
+                    <strong class="amp-step__amount amp-step__amount--muted">
+                      {{ rawCupo() | currencyCop }}
+                    </strong>
+                  </div>
+                </div>
+                <div class="amp-connector amp-connector--cap">
+                  <div class="amp-connector__track"></div>
+                  <div class="amp-connector__pill amp-connector__pill--cap">
+                    <app-icon name="verified_user" [size]="12" />
+                    Tope del segmento · máx {{ s.cupo_base_max | currencyCop }}
+                  </div>
+                </div>
+              }
+
+              <!-- Step 3: cupo final -->
+              <div class="amp-step">
+                <div class="amp-step__marker amp-step__marker--final">
+                  <app-icon name="check" [size]="14" color="#fff" />
+                </div>
+                <div class="amp-step__body">
+                  <span class="amp-step__label">Tu cupo final</span>
+                  <strong class="amp-step__amount amp-step__amount--primary">
+                    {{ cupoFinal() | currencyCop }}
+                  </strong>
+                </div>
+              </div>
+
+            </div><!-- /amp-flow -->
+
+            <!-- Score detail accordion -->
+            @if (s.components.length) {
+              <button
+                class="score-accordion"
+                (click)="showScoreDetail.set(!showScoreDetail())"
+                [attr.aria-expanded]="showScoreDetail()"
+              >
+                <span>
+                  <app-icon name="help_outline" [size]="14" />
+                  ¿Cómo llegué a {{ s.score_base | number: '1.0-0' }} puntos?
+                </span>
+                <app-icon [name]="showScoreDetail() ? 'expand_less' : 'expand_more'" [size]="18" />
+              </button>
+
+              @if (showScoreDetail()) {
+                <ul class="score-detail anim-fade-up">
+                  @for (c of s.components; track c.name) {
+                    <li class="score-detail__item">
+                      <div class="score-detail__bar-wrap">
+                        <span class="score-detail__label">{{ prettyName(c.name) }}</span>
+                        <div class="score-detail__bar">
+                          <div
+                            class="score-detail__fill"
+                            [style.width.%]="(c.contribution / s.score_base) * 100"
+                          ></div>
+                        </div>
+                      </div>
+                      <strong class="score-detail__val">{{ c.contribution | number: '1.0-0' }}</strong>
+                    </li>
+                  }
+                  @if (s.deuda_activa > 0) {
+                    <li class="score-detail__item score-detail__item--debt">
+                      <span class="score-detail__label">Deuda activa descontada</span>
+                      <strong class="score-detail__val">−{{ s.deuda_activa | currencyCop }}</strong>
+                    </li>
+                  }
+                </ul>
+              }
+            }
+          </app-card>
+        }
+
+        <!-- Recommended products -->
+        @if (productsRecommended().length) {
+          <app-card class="context-card">
+            <header class="context-card__head">
+              <app-icon name="recommend" [size]="20" color="var(--color-primary)" />
+              <h3>Productos sugeridos</h3>
+              <span class="multiplier-tag" style="background:var(--color-secondary)">
+                {{ productsRecommended().length }}
+              </span>
+            </header>
+            <div class="product-list">
+              @for (rec of productsRecommended(); track rec.rank) {
+                <div class="product-rec">
+                  <div class="product-rec__head">
+                    <app-icon
+                      [name]="productIcon(rec.product.type)"
+                      [size]="20"
+                      color="var(--color-primary)"
+                    />
+                    <div class="product-rec__info">
+                      <strong>{{ rec.product.name }}</strong>
+                      <span class="product-rec__role">
+                        {{ rec.role === 'principal' ? 'Oferta principal' : 'Producto complementario' }}
+                      </span>
+                    </div>
+                  </div>
+                  <p class="product-rec__narrative">{{ rec.narrative }}</p>
+                </div>
+              }
+            </div>
+          </app-card>
+        }
+
+      </div><!-- /context-stack -->
+    </div><!-- /offer-grid -->
+  }
+
+  <!-- ── OTP verification ── -->
+  @if (stage() === 'otp' || stage() === 'confirming') {
+    @if (acceptData(); as acc) {
+      <app-card class="otp-screen anim-scale-in">
+        <div class="otp-screen__hero">
+          <div class="otp-screen__icon">
+            <app-icon name="mark_email_unread" [size]="36" color="var(--color-primary)" />
+          </div>
+          <h2>Código enviado a tu correo</h2>
+          <p>
+            Enviamos un código de 6 dígitos a
+            <strong>{{ acc.masked_email }}</strong>
+          </p>
+        </div>
+
+        <div class="otp-input-wrap">
+          <input
+            type="text"
+            inputmode="numeric"
+            pattern="[0-9]*"
+            maxlength="6"
+            autocomplete="one-time-code"
+            class="otp-input"
+            placeholder="000000"
+            [value]="otpValue()"
+            (input)="onOtpInput($event)"
+            [disabled]="stage() === 'confirming'"
+          />
+        </div>
+
+        @if (otpError()) {
+          <p class="otp-error anim-fade-up">
+            <app-icon name="error_outline" [size]="14" />
+            {{ otpError() }}
+          </p>
+        }
+
+        <div class="otp-screen__meta">
+          @if (otpSecondsLeft() > 0) {
+            <app-icon name="schedule" [size]="14" color="var(--color-on-surface-variant)" />
+            Código válido por <strong>{{ otpCountdown() }}</strong>
+          } @else {
+            <app-icon name="timer_off" [size]="14" color="var(--color-secondary)" />
+            <span style="color: var(--color-secondary)">Código expirado</span>
+          }
+        </div>
+
+        <app-button
+          variant="primary"
+          icon="verified"
+          [block]="true"
+          [loading]="stage() === 'confirming'"
+          [disabled]="otpValue().length < 6 || stage() === 'confirming' || otpSecondsLeft() === 0"
+          (click)="submitOtp()"
+        >
+          {{ stage() === 'confirming' ? 'Confirmando…' : 'Confirmar y desembolsar' }}
+        </app-button>
+
+        <div class="otp-screen__footer">
+          <app-button variant="ghost" icon="arrow_back" (click)="resetFlow()">
+            Cancelar
+          </app-button>
+        </div>
+      </app-card>
+    }
+  }
+
+  <!-- ── Done ── -->
+  @if (stage() === 'done' && confirmation(); as conf) {
+    <app-card class="success anim-scale-in">
+      <div class="success__icon">
+        <app-icon name="check_circle" [size]="48" color="var(--color-success)" />
+      </div>
+      <h2>¡Desembolso confirmado!</h2>
+      <p>
+        Acabamos de transferir <strong>{{ conf.amount | currencyCop }}</strong> a la billetera de
+        <strong>{{ razonSocial() }}</strong>.
+        Tu préstamo <em>{{ conf.product_name }}</em> está activo.
+      </p>
+      <div class="success__meta">
+        <span>
+          <app-icon name="schedule" [size]="14" />
+          {{ conf.disbursed_at | date: 'short' : '' : 'es-CO' }}
+        </span>
+        <span>
+          <app-icon name="receipt_long" [size]="14" />
+          Ref #{{ conf.reference }}
+        </span>
+        <span>
+          <app-icon name="event" [size]="14" />
+          Próximo pago {{ conf.next_payment_due | date: 'dd/MM/yyyy' }}
+        </span>
+        <span>
+          <app-icon name="verified" [size]="14" />
+          {{ conf.status | titlecase }}
+        </span>
+      </div>
+      <div class="success__actions">
+        <app-button variant="ghost" icon="refresh" (click)="resetFlow()">
+          Solicitar otro cupo
+        </app-button>
+        <app-button variant="primary" icon="receipt_long">Ver comprobante</app-button>
+      </div>
+    </app-card>
+  }
+</section>

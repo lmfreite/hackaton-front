@@ -1,0 +1,113 @@
+// Serfinanza Design Foundation — design tokens
+// Exposed as CSS custom properties so they can be consumed from any component.
+
+:root {
+  // Surface
+  --color-surface: #f7f9fb;
+  --color-surface-dim: #d8dadc;
+  --color-surface-bright: #f7f9fb;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f2f4f6;
+  --color-surface-container: #eceef0;
+  --color-surface-container-high: #e6e8ea;
+  --color-surface-container-highest: #e0e3e5;
+  --color-on-surface: #191c1e;
+  --color-on-surface-variant: #464553;
+  --color-inverse-surface: #2d3133;
+  --color-inverse-on-surface: #eff1f3;
+  --color-outline: #777584;
+  --color-outline-variant: #c7c5d5;
+  --color-surface-tint: #5251bb;
+
+  // Primary (deep blue)
+  --color-primary: #070053;
+  --color-on-primary: #ffffff;
+  --color-primary-container: #170c84;
+  --color-on-primary-container: #8383f0;
+  --color-inverse-primary: #c2c1ff;
+  --color-primary-fixed: #e2dfff;
+  --color-primary-fixed-dim: #c2c1ff;
+  --color-on-primary-fixed: #0c006a;
+  --color-on-primary-fixed-variant: #3937a2;
+
+  // Secondary (vibrant red)
+  --color-secondary: #b8183e;
+  --color-on-secondary: #ffffff;
+  --color-secondary-container: #ff516c;
+  --color-on-secondary-container: #5b0017;
+  --color-secondary-fixed: #ffdadb;
+  --color-secondary-fixed-dim: #ffb2b7;
+  --color-on-secondary-fixed: #40000e;
+  --color-on-secondary-fixed-variant: #91002b;
+
+  // Tertiary (near-black)
+  --color-tertiary: #131414;
+  --color-on-tertiary: #ffffff;
+  --color-tertiary-container: #272828;
+  --color-on-tertiary-container: #8f8f8f;
+  --color-tertiary-fixed: #e4e2e2;
+  --color-tertiary-fixed-dim: #c7c6c6;
+  --color-on-tertiary-fixed: #1b1c1c;
+  --color-on-tertiary-fixed-variant: #464747;
+
+  // Error
+  --color-error: #ba1a1a;
+  --color-on-error: #ffffff;
+  --color-error-container: #ffdad6;
+  --color-on-error-container: #93000a;
+
+  // Background
+  --color-background: #f7f9fb;
+  --color-on-background: #191c1e;
+  --color-surface-variant: #e0e3e5;
+
+  // Semantic helpers (custom — derived for status chips)
+  --color-success: #1e7f4e;
+  --color-success-container: #d8f3e4;
+  --color-warning: #b76900;
+  --color-warning-container: #ffeed1;
+  --color-info: #1d4ed8;
+  --color-info-container: #dbe5ff;
+
+  // Radius
+  --radius-sm: 0.125rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  --radius-full: 9999px;
+
+  // Spacing scale (8px base)
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 40px;
+  --space-9: 48px;
+  --space-10: 64px;
+
+  // Layout
+  --sidebar-width: 280px;
+  --topbar-height: 72px;
+  --container-max: 1440px;
+  --gutter: 24px;
+  --margin-mobile: 16px;
+  --margin-desktop: 32px;
+
+  // Elevation (tonal + subtle ambient shadows)
+  --shadow-card: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 12px rgba(15, 23, 42, 0.05);
+  --shadow-overlay: 0 8px 32px rgba(15, 23, 42, 0.16);
+  --shadow-focus: 0 0 0 4px rgba(7, 0, 83, 0.12);
+
+  // Motion
+  --ease-emphasized: cubic-bezier(0.2, 0, 0, 1);
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-accelerate: cubic-bezier(0.4, 0, 1, 1);
+  --duration-instant: 80ms;
+  --duration-fast: 160ms;
+  --duration-base: 240ms;
+  --duration-slow: 360ms;
+}

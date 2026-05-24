@@ -1,0 +1,9 @@
+{
+  "/api": {
+    "target": "https://api-nexo.stampedev.cloud",
+    "secure": true,
+    "changeOrigin": true,
+    "cookieDomainRewrite": "localhost",
+    "logLevel": "info"
+  }
+}
