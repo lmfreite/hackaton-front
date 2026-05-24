@@ -76,8 +76,8 @@
         <app-button variant="primary" icon="swap_horiz" routerLink="/transferencias">
           Nueva transferencia
         </app-button>
-        <app-button variant="ghost" icon="receipt_long" routerLink="/recibos">
-          Ver recibos
+        <app-button variant="ghost" icon="receipt_long" routerLink="/transacciones">
+          Ver transacciones
         </app-button>
       </div>
     </app-card>
@@ -117,7 +117,7 @@
         <h3 class="tx-head__title">Transacciones recientes</h3>
         <p class="tx-head__subtitle">Movimientos de los últimos 7 días</p>
       </div>
-      <a routerLink="/transferencias" class="tx-head__link">
+      <a routerLink="/transacciones" class="tx-head__link">
         Ver todas
         <app-icon name="arrow_forward" [size]="16" />
       </a>

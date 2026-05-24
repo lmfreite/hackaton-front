@@ -105,11 +105,36 @@ export class AuthService {
   /**
    * Called once on application bootstrap to attempt session rehydration.
    * Sets `ready()` to true once the attempt completes (success or failure).
+   *
+   * If /auth/me returns 401 (access token expired but refresh token may still
+   * be valid), we attempt a silent refresh BEFORE giving up.  This covers the
+   * common scenario where the user returns to the app after the access token
+   * has expired: the interceptor cannot handle it because the memory user
+   * signal is null at boot time (`isAuthenticated()` is false), so bootstrap
+   * must own the refresh-retry logic itself.
+   *
+   * Flow:
+   *   /auth/me OK                  → authenticated, ready
+   *   /auth/me 401 → /auth/refresh OK → /auth/me retry OK → authenticated, ready
+   *   /auth/me 401 → /auth/refresh fails               → not authenticated, ready
+   *   /auth/me other error                              → not authenticated, ready
    */
   bootstrap(): Observable<boolean> {
     return this.me().pipe(
       map(() => true),
-      catchError(() => of(false)),
+      catchError((err: unknown) => {
+        // Only try to refresh on a 401 — any other error (network, 500…)
+        // means the server is down, not that the token is stale.
+        if (err instanceof HttpErrorResponse && err.status === 401) {
+          return this.refreshToken().pipe(
+            switchMap(() => this.me()),
+            map(() => true),
+            // Refresh itself failed (revoked, expired, missing cookie) → logout.
+            catchError(() => of(false)),
+          );
+        }
+        return of(false);
+      }),
       tap(() => this._ready.set(true)),
     );
   }

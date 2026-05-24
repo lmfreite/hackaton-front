@@ -49,6 +49,7 @@ export class SalvavidasComponent implements OnInit, OnDestroy {
   readonly errorMessage = signal<string>('');
   readonly selectedAmount = signal<number>(0);
   readonly showScoreDetail = signal(false);
+  readonly showAltProducts = signal(false);
 
   // ── OTP state ───────────────────────────────────────────────────────────
   readonly otpValue = signal('');
@@ -203,6 +204,7 @@ export class SalvavidasComponent implements OnInit, OnDestroy {
     this.stage.set('analyzing');
     this.errorMessage.set('');
     this.showScoreDetail.set(false);
+    this.showAltProducts.set(false);
     this.otpValue.set('');
     this.otpError.set(null);
     this.svc.reset();

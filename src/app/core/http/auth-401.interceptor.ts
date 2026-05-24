@@ -33,7 +33,10 @@ export const auth401Interceptor: HttpInterceptorFn = (req, next) => {
         err instanceof HttpErrorResponse &&
         err.status === 401 &&
         !isAuthEndpoint(req.url) &&
-        auth.isAuthenticated()
+        // Allow refresh if the user was authenticated OR if the app is still
+        // booting (ready=false, user null). This handles API calls made before
+        // bootstrap completes when the access token has already expired.
+        (auth.isAuthenticated() || !auth.ready())
       ) {
         // ── Attempt silent token refresh ───────────────────────────────────
         return auth.refreshToken().pipe(

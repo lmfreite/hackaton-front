@@ -72,7 +72,8 @@
   @if ((stage() === 'offer' || stage() === 'confirming') && hasContext()) {
     <div class="offer-grid">
 
-      <!-- Left: offer card -->
+      <!-- Left: offer card + featured product -->
+      <div class="offer-col">
       <app-card class="offer-card anim-scale-in">
         <header class="offer-card__head">
           <div>
@@ -156,53 +157,67 @@
         </div>
       </app-card>
 
+      <!-- Featured product — below offer card, same column -->
+      @if (creditProduct(); as cp) {
+        <div class="product-featured anim-fade-up">
+          <div class="product-featured__eyebrow">
+            <app-icon name="star" [size]="13" color="var(--color-secondary)" />
+            Oferta seleccionada para ti
+          </div>
+
+          <div class="product-featured__body">
+            <div class="product-featured__icon">
+              <app-icon [name]="productIcon(cp.product.type)" [size]="24" color="var(--color-on-primary)" />
+            </div>
+            <div class="product-featured__info">
+              <h3 class="product-featured__name">{{ cp.product.name }}</h3>
+              <span class="product-featured__type">{{ cp.product.type | titlecase }}</span>
+            </div>
+            <span class="product-featured__badge">Principal</span>
+          </div>
+
+          @if (cp.narrative) {
+            <p class="product-featured__narrative">{{ cp.narrative }}</p>
+          }
+
+          @if (productsRecommended().length > 1) {
+            <div class="product-alt-list">
+              <button
+                class="product-alt-toggle"
+                (click)="showAltProducts.set(!showAltProducts())"
+                [attr.aria-expanded]="showAltProducts()"
+              >
+                <span>
+                  <app-icon name="grid_view" [size]="14" />
+                  {{ productsRecommended().length - 1 }} producto{{ productsRecommended().length - 1 > 1 ? 's' : '' }} alternativo{{ productsRecommended().length - 1 > 1 ? 's' : '' }} disponible{{ productsRecommended().length - 1 > 1 ? 's' : '' }}
+                </span>
+                <app-icon [name]="showAltProducts() ? 'expand_less' : 'expand_more'" [size]="18" />
+              </button>
+
+              @if (showAltProducts()) {
+                <div class="product-alt-items anim-fade-up">
+                  @for (rec of productsRecommended(); track rec.rank) {
+                    @if (rec.role !== 'principal') {
+                      <div class="product-alt">
+                        <app-icon [name]="productIcon(rec.product.type)" [size]="16" color="rgba(255,255,255,0.55)" />
+                        <div class="product-alt__info">
+                          <span>{{ rec.product.name }}</span>
+                          <p>{{ rec.narrative }}</p>
+                        </div>
+                      </div>
+                    }
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+
+      </div><!-- /offer-col -->
+
       <!-- Right: context stack -->
       <div class="context-stack">
-
-        <!-- ── Featured product (principal) — protagonist ── -->
-        @if (creditProduct(); as cp) {
-          <div class="product-featured anim-fade-up">
-            <div class="product-featured__eyebrow">
-              <app-icon name="star" [size]="13" color="var(--color-secondary)" />
-              Oferta seleccionada para ti
-            </div>
-
-            <div class="product-featured__body">
-              <div class="product-featured__icon">
-                <app-icon [name]="productIcon(cp.product.type)" [size]="24" color="var(--color-on-primary)" />
-              </div>
-              <div class="product-featured__info">
-                <h3 class="product-featured__name">{{ cp.product.name }}</h3>
-                <span class="product-featured__type">
-                  {{ cp.product.type | titlecase }}
-                </span>
-              </div>
-              <span class="product-featured__badge">Principal</span>
-            </div>
-
-            @if (cp.narrative) {
-              <p class="product-featured__narrative">{{ cp.narrative }}</p>
-            }
-
-            <!-- Other recommended products (complementary) -->
-            @if (productsRecommended().length > 1) {
-              <div class="product-alt-list">
-                <span class="product-alt-list__label">También disponibles</span>
-                @for (rec of productsRecommended(); track rec.rank) {
-                  @if (rec.role !== 'principal') {
-                    <div class="product-alt">
-                      <app-icon [name]="productIcon(rec.product.type)" [size]="16" color="var(--color-on-surface-variant)" />
-                      <div class="product-alt__info">
-                        <span>{{ rec.product.name }}</span>
-                        <p>{{ rec.narrative }}</p>
-                      </div>
-                    </div>
-                  }
-                }
-              </div>
-            }
-          </div>
-        }
 
         <!-- Calendar context -->
         @if (calendar(); as c) {
