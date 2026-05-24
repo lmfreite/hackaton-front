@@ -7,7 +7,9 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile
 
 COPY . .
-RUN pnpm build
+ARG API_BASE_URL=https://api-nexo.stampedev.cloud
+RUN sed -i "s|apiBaseUrl: '.*'|apiBaseUrl: '${API_BASE_URL}'|g" src/environments/environment.prod.ts
+RUN pnpm build --configuration production
 
 FROM nginx:1.27-alpine AS runtime
 COPY --from=build /app/dist/nexo-agent/browser /usr/share/nginx/html
