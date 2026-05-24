@@ -29,6 +29,12 @@ export const routes: Routes = [
         title: 'Salvavidas Pyme · Powered by Nexo',
       },
       {
+        path: 'transacciones',
+        loadComponent: () =>
+          import('./features/transactions/transactions.component').then((m) => m.TransactionsComponent),
+        title: 'Transacciones · Serfinanza Nexo',
+      },
+      {
         path: 'transferencias',
         loadComponent: () =>
           import('./features/transfers/transfers.component').then((m) => m.TransfersComponent),
