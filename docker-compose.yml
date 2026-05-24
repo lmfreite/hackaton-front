@@ -3,8 +3,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        API_BASE_URL: ${API_BASE_URL:-https://api-nexo.stampedev.cloud}
+    environment:
+      API_BASE_URL: ${API_BASE_URL:-https://api-nexo.stampedev.cloud}
+      API_HOST: ${API_HOST:-api-nexo.stampedev.cloud}
     expose:
       - "80"
     restart: unless-stopped
