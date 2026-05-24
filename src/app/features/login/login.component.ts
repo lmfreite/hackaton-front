@@ -19,30 +19,55 @@ import { IconComponent } from '../../shared/ui/icon/icon.component';
         </div>
 
         <div class="auth__copy anim-fade-up">
-          <p class="auth__eyebrow">
-            <app-icon name="auto_awesome" [size]="16" />
-            Powered by Nexo · Agente Salvavidas Pyme
-          </p>
-          <h1 class="auth__headline">Tu cupo Pyme,<br />listo en 2 minutos.</h1>
+
+          <!-- Announcement badge — voz de Serfinanza -->
+          <div class="auth__announce">
+            <span class="auth__announce-dot"></span>
+            <span>Nuevo · Exclusivo para comercios activos</span>
+          </div>
+
+          <h1 class="auth__headline">
+            <span class="auth__nexo-tag">
+              <img src="nexo_logo_horizontal.webp" alt="Nexo" class="auth__nexo-logo" />
+            </span>
+            llegó a<br />Serfinanza.
+          </h1>
+
           <p class="auth__sub">
-            Iniciamos sesión en tu portal empresarial para evaluar tu comportamiento, tu zona y la
-            temporada actual, y proponerte un cupo de capital de trabajo en tiempo real.
+            Si tienes una cuenta de ahorros empresarial activa, ya puedes acceder a
+            capital de trabajo inteligente — calculado con tu historial real,
+            sin llamadas y sin visitas a sucursal.
           </p>
 
           <ul class="auth__bullets">
             <li>
-              <app-icon name="bolt" [size]="18" color="var(--color-secondary)" />
-              Score dinámico con contexto temporal y geográfico
+              <app-icon name="bolt" [size]="16" color="#00C2A8" />
+              Cupo pre-aprobado listo en menos de 2 minutos
             </li>
             <li>
-              <app-icon name="shield" [size]="18" color="var(--color-secondary)" />
-              Cupo regulado con cap 1.6× para riesgo controlado
+              <app-icon name="public" [size]="16" color="#00C2A8" />
+              Ajustado a tu zona geográfica y la temporada actual
             </li>
             <li>
-              <app-icon name="account_balance_wallet" [size]="18" color="var(--color-secondary)" />
-              Desembolso inmediato al wallet de la Pyme
+              <app-icon name="trending_up" [size]="16" color="#00C2A8" />
+              La oferta llega antes de que la necesites
+            </li>
+            <li>
+              <app-icon name="account_balance_wallet" [size]="16" color="#00C2A8" />
+              Desembolso inmediato directo a tu cuenta
             </li>
           </ul>
+
+          <!-- Partnership footer -->
+          <div class="auth__partnership">
+            <span>Una alianza estratégica</span>
+            <div class="auth__partnership-row">
+              <span class="auth__partnership-bank">Serfinanza</span>
+              <span class="auth__partnership-sep">×</span>
+              <img src="nexo_logo_horizontal.webp" alt="Nexo" class="auth__nexo-logo-sm" />
+            </div>
+          </div>
+
         </div>
       </section>
 

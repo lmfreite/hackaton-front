@@ -115,16 +115,18 @@ export class AuthService {
   }
 
   logout(): Observable<LogoutResponse> {
+    // Clear local state and cookies IMMEDIATELY — do not wait for the HTTP
+    // response. This prevents the publicOnlyGuard from calling /auth/me with a
+    // still-valid cookie and redirecting back to the dashboard.
+    this._user.set(null);
+    this.clearBrowserCookies();
+
     return this.http
-      .post<StandardResponse<LogoutResponse>>('/api/v1/auth/logout', {})
+      .post<StandardResponse<LogoutResponse>>('/api/v1/auth/logout', {}, { withCredentials: true })
       .pipe(
         map((res) => res.Data),
-        tap(() => this._user.set(null)),
-        catchError((err: unknown) => {
-          // Even on failure, drop the local user — they cannot use the app anyway.
-          this._user.set(null);
-          return throwError(() => err);
-        }),
+        // API failure is acceptable — local state is already cleared above.
+        catchError(() => of({ Authenticated: false } as unknown as LogoutResponse)),
       );
   }
 
