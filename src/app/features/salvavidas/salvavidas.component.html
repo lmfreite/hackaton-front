@@ -450,40 +450,72 @@
 
   <!-- ── Done ── -->
   @if (stage() === 'done' && confirmation(); as conf) {
-    <app-card class="success anim-scale-in">
-      <div class="success__icon">
-        <app-icon name="check_circle" [size]="48" color="var(--color-success)" />
-      </div>
-      <h2>¡Desembolso confirmado!</h2>
-      <p>
-        Acabamos de transferir <strong>{{ conf.amount | currencyCop }}</strong> a la billetera de
-        <strong>{{ razonSocial() }}</strong>.
-        Tu préstamo <em>{{ conf.product_name }}</em> está activo.
-      </p>
-      <div class="success__meta">
-        <span>
-          <app-icon name="schedule" [size]="14" />
-          {{ conf.disbursed_at | date: 'short' : '' : 'es-CO' }}
-        </span>
-        <span>
-          <app-icon name="receipt_long" [size]="14" />
-          Ref #{{ conf.reference }}
-        </span>
-        <span>
-          <app-icon name="event" [size]="14" />
-          Próximo pago {{ conf.next_payment_due | date: 'dd/MM/yyyy' }}
-        </span>
-        <span>
-          <app-icon name="verified" [size]="14" />
-          {{ conf.status | titlecase }}
-        </span>
-      </div>
-      <div class="success__actions">
-        <app-button variant="ghost" icon="refresh" (click)="resetFlow()">
-          Solicitar otro cupo
-        </app-button>
-        <app-button variant="primary" icon="receipt_long">Ver comprobante</app-button>
-      </div>
-    </app-card>
+    <div class="success-wrap anim-scale-in">
+      <app-card class="success">
+
+        <!-- Top: icon + identity -->
+        <div class="success__top">
+          <div class="success__check">
+            <app-icon name="check" [size]="30" color="#fff" />
+          </div>
+          <div class="success__top-text">
+            <h2>¡Desembolso confirmado!</h2>
+            <p>{{ razonSocial() }}</p>
+          </div>
+        </div>
+
+        <!-- Amount hero -->
+        <div class="success__amount-box">
+          <span class="label-sm">Monto transferido</span>
+          <div class="success__amount">{{ conf.amount | currencyCop }}</div>
+          <span class="success__product">
+            <app-icon name="credit_card" [size]="14" color="var(--color-secondary)" />
+            {{ conf.product_name }}
+          </span>
+        </div>
+
+        <!-- Loan details grid -->
+        <div class="success__grid">
+          <div class="success__cell">
+            <span class="label-sm">Referencia</span>
+            <strong>#{{ conf.reference }}</strong>
+          </div>
+          <div class="success__cell">
+            <span class="label-sm">Desembolso</span>
+            <strong>{{ conf.disbursed_at | date: 'dd/MM/yyyy' }}</strong>
+          </div>
+          <div class="success__cell">
+            <span class="label-sm">Próximo pago</span>
+            <strong>{{ conf.next_payment_due | date: 'dd/MM/yyyy' }}</strong>
+          </div>
+          <div class="success__cell">
+            <span class="label-sm">Cuota estimada</span>
+            <strong>{{ conf.installment_amount | currencyCop }}</strong>
+          </div>
+          <div class="success__cell">
+            <span class="label-sm">Tasa E.A.</span>
+            <strong>{{ (conf.rate_ea * 100) | number: '1.2-2' }}%</strong>
+          </div>
+          <div class="success__cell">
+            <span class="label-sm">Estado</span>
+            <strong class="success__status">
+              <span class="success__dot"></span>
+              {{ conf.status | titlecase }}
+            </strong>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="success__actions">
+          <app-button variant="tonal" icon="refresh" (click)="resetFlow()">
+            Solicitar otro cupo
+          </app-button>
+          <app-button variant="primary" icon="receipt_long">
+            Ver comprobante
+          </app-button>
+        </div>
+
+      </app-card>
+    </div>
   }
 </section>

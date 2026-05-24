@@ -30,9 +30,20 @@ export const publicOnlyGuard: CanActivateFn = () => {
   const auth = inject(AuthService);
   const router = inject(Router);
 
+  // Fast path: definitely authenticated → go to dashboard.
   if (auth.isAuthenticated()) {
     return router.createUrlTree(['/dashboard']);
   }
+
+  // If the auth service already finished initialising and the user is null,
+  // allow the login page without a network round-trip. This covers the
+  // post-logout case: the user signal was cleared synchronously, so we should
+  // never bounce them back to the dashboard.
+  if (auth.ready()) {
+    return true;
+  }
+
+  // First load with no user in memory: try to rehydrate from the session cookie.
   return auth.bootstrap().pipe(
     map((ok) => (ok ? router.createUrlTree(['/dashboard']) : true)),
   );

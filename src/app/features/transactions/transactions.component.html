@@ -1,0 +1,168 @@
+<section class="page">
+
+  <!-- ── Header ── -->
+  <header class="page__header">
+    <div>
+      <p class="page__eyebrow">
+        <app-icon name="account_balance" [size]="14" />
+        Cuenta · Serfinanza
+      </p>
+      <h1 class="page__title">Mis Transacciones</h1>
+      <p class="page__subtitle">Historial de movimientos de tu cuenta empresarial.</p>
+    </div>
+    <app-button variant="tonal" icon="download">Exportar</app-button>
+  </header>
+
+  <!-- ── Summary stats ── -->
+  @if (txs().length && !loading()) {
+    <div class="stats-row anim-fade-up">
+      <div class="stat stat--in">
+        <span class="stat__label">
+          <app-icon name="arrow_downward" [size]="13" />
+          Ingresos (página)
+        </span>
+        <strong>{{ totals().inc | currencyCop }}</strong>
+      </div>
+      <div class="stat stat--out">
+        <span class="stat__label">
+          <app-icon name="arrow_upward" [size]="13" />
+          Egresos (página)
+        </span>
+        <strong>{{ totals().out | currencyCop }}</strong>
+      </div>
+      <div class="stat" [class.stat--in]="totals().net >= 0" [class.stat--out]="totals().net < 0">
+        <span class="stat__label">
+          <app-icon name="balance" [size]="13" />
+          Neto
+        </span>
+        <strong>{{ totals().net | currencyCop }}</strong>
+      </div>
+    </div>
+  }
+
+  <!-- ── Filters ── -->
+  <app-card class="filters anim-fade-up">
+    <!-- Search -->
+    <div class="filters__search">
+      <app-icon name="search" [size]="18" color="var(--color-on-surface-variant)" />
+      <input
+        type="search"
+        placeholder="Buscar por descripción…"
+        [value]="filterSearch()"
+        (input)="onSearch($any($event.target).value)"
+        class="filters__input"
+      />
+    </div>
+
+    <div class="filters__row">
+      <!-- Type -->
+      <div class="filters__group">
+        <span class="filters__label">Tipo</span>
+        <div class="filter-pills">
+          <button class="filter-pill" [class.is-active]="filterType() === ''"       (click)="setType('')">Todos</button>
+          <button class="filter-pill filter-pill--in"  [class.is-active]="filterType() === 'ingreso'" (click)="setType('ingreso')">
+            <app-icon name="arrow_downward" [size]="13" /> Ingresos
+          </button>
+          <button class="filter-pill filter-pill--out" [class.is-active]="filterType() === 'egreso'"  (click)="setType('egreso')">
+            <app-icon name="arrow_upward" [size]="13" /> Egresos
+          </button>
+        </div>
+      </div>
+
+      <!-- Status -->
+      <div class="filters__group">
+        <span class="filters__label">Estado</span>
+        <div class="filter-pills">
+          <button class="filter-pill" [class.is-active]="filterStatus() === ''"         (click)="setStatus('')">Todos</button>
+          <button class="filter-pill" [class.is-active]="filterStatus() === 'posted'"   (click)="setStatus('posted')">Liquidadas</button>
+          <button class="filter-pill" [class.is-active]="filterStatus() === 'pending'"  (click)="setStatus('pending')">Pendientes</button>
+          <button class="filter-pill" [class.is-active]="filterStatus() === 'reversed'" (click)="setStatus('reversed')">Reversadas</button>
+          <button class="filter-pill" [class.is-active]="filterStatus() === 'failed'"   (click)="setStatus('failed')">Fallidas</button>
+        </div>
+      </div>
+    </div>
+  </app-card>
+
+  <!-- ── Loading ── -->
+  @if (loading()) {
+    <app-card class="loading-card">
+      <div class="spin"></div>
+      <p>Cargando movimientos…</p>
+    </app-card>
+  }
+
+  <!-- ── Transaction list ── -->
+  @if (!loading()) {
+    @if (txs().length) {
+      <app-card class="tx-list anim-fade-up">
+        @for (tx of txs(); track tx.id; let last = $last) {
+          <div class="tx-row" [class.is-reversal]="tx.is_reversal" [class.no-border]="last">
+
+            <!-- Type badge -->
+            <div class="tx-badge" [class.tx-badge--in]="isIngreso(tx)" [class.tx-badge--out]="!isIngreso(tx)">
+              <app-icon
+                [name]="isIngreso(tx) ? 'south' : 'north'"
+                [size]="16"
+                [color]="isIngreso(tx) ? '#059669' : '#dc2626'"
+              />
+            </div>
+
+            <!-- Description + channel -->
+            <div class="tx-info">
+              <span class="tx-info__desc">{{ tx.description || 'Sin descripción' }}</span>
+              <span class="tx-info__meta">
+                {{ tx.channel }}
+                @if (tx.is_reversal) {
+                  <span class="reversal-tag">
+                    <app-icon name="undo" [size]="11" /> Reversión
+                  </span>
+                }
+              </span>
+            </div>
+
+            <!-- Date -->
+            <time class="tx-date" [attr.datetime]="tx.created_at">
+              {{ tx.created_at | date: 'dd MMM yyyy' }}
+              <span>{{ tx.created_at | date: 'HH:mm' }}</span>
+            </time>
+
+            <!-- Status chip -->
+            <app-status-chip [tone]="statusTone(tx.status)">
+              {{ statusLabel(tx.status) }}
+            </app-status-chip>
+
+            <!-- Amount -->
+            <span class="tx-amount" [class.tx-amount--in]="isIngreso(tx)" [class.tx-amount--out]="!isIngreso(tx)">
+              {{ isIngreso(tx) ? '+' : '−' }}{{ +tx.amount | currencyCop }}
+            </span>
+
+          </div>
+        }
+      </app-card>
+
+      <!-- Pagination -->
+      <div class="pagination">
+        <app-button variant="ghost" icon="chevron_left" [disabled]="page() <= 1" (click)="prev()">
+          Anterior
+        </app-button>
+        <span class="pagination__page">Página {{ page() }}</span>
+        <app-button variant="ghost" [disabled]="!hasMore()" (click)="next()">
+          Siguiente <app-icon name="chevron_right" [size]="16" />
+        </app-button>
+      </div>
+
+    } @else {
+      <app-card class="empty-card anim-fade-up">
+        <app-icon name="receipt_long" [size]="44" color="var(--color-outline)" />
+        <h3>Sin movimientos</h3>
+        <p>No encontramos transacciones con los filtros actuales.</p>
+        @if (filterType() || filterStatus() || filterSearch()) {
+          <app-button variant="ghost" icon="filter_alt_off" (click)="setType(''); setStatus(''); filterSearch.set('')">
+            Limpiar filtros
+          </app-button>
+        }
+      </app-card>
+    }
+  }
+
+</section>

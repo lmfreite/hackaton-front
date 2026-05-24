@@ -55,7 +55,8 @@ interface NavItem {
 })
 export class SidebarComponent {
   readonly items: NavItem[] = [
-    { label: 'Resumen', route: '/dashboard', icon: 'dashboard' },
-    { label: 'Salvavidas Pyme', route: '/salvavidas', icon: 'health_and_safety', badge: 'Nexo' },
+    { label: 'Resumen',         route: '/dashboard',     icon: 'dashboard' },
+    { label: 'Transacciones',   route: '/transacciones', icon: 'receipt_long' },
+    { label: 'Salvavidas Pyme', route: '/salvavidas',    icon: 'health_and_safety', badge: 'Nexo' },
   ];
 }
