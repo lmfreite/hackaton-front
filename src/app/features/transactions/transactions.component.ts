@@ -7,7 +7,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { DatePipe, TitleCasePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 import { CardComponent } from '../../shared/ui/card/card.component';
@@ -25,7 +25,6 @@ import { ChipTone } from '../../shared/ui/status-chip/status-chip.component';
   standalone: true,
   imports: [
     DatePipe,
-    TitleCasePipe,
     FormsModule,
     CardComponent,
     ButtonComponent,

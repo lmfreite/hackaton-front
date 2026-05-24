@@ -159,6 +159,51 @@
       <!-- Right: context stack -->
       <div class="context-stack">
 
+        <!-- ── Featured product (principal) — protagonist ── -->
+        @if (creditProduct(); as cp) {
+          <div class="product-featured anim-fade-up">
+            <div class="product-featured__eyebrow">
+              <app-icon name="star" [size]="13" color="var(--color-secondary)" />
+              Oferta seleccionada para ti
+            </div>
+
+            <div class="product-featured__body">
+              <div class="product-featured__icon">
+                <app-icon [name]="productIcon(cp.product.type)" [size]="24" color="var(--color-on-primary)" />
+              </div>
+              <div class="product-featured__info">
+                <h3 class="product-featured__name">{{ cp.product.name }}</h3>
+                <span class="product-featured__type">
+                  {{ cp.product.type | titlecase }}
+                </span>
+              </div>
+              <span class="product-featured__badge">Principal</span>
+            </div>
+
+            @if (cp.narrative) {
+              <p class="product-featured__narrative">{{ cp.narrative }}</p>
+            }
+
+            <!-- Other recommended products (complementary) -->
+            @if (productsRecommended().length > 1) {
+              <div class="product-alt-list">
+                <span class="product-alt-list__label">También disponibles</span>
+                @for (rec of productsRecommended(); track rec.rank) {
+                  @if (rec.role !== 'principal') {
+                    <div class="product-alt">
+                      <app-icon [name]="productIcon(rec.product.type)" [size]="16" color="var(--color-on-surface-variant)" />
+                      <div class="product-alt__info">
+                        <span>{{ rec.product.name }}</span>
+                        <p>{{ rec.narrative }}</p>
+                      </div>
+                    </div>
+                  }
+                }
+              </div>
+            }
+          </div>
+        }
+
         <!-- Calendar context -->
         @if (calendar(); as c) {
           <app-card class="context-card">
@@ -344,38 +389,6 @@
           </app-card>
         }
 
-        <!-- Recommended products -->
-        @if (productsRecommended().length) {
-          <app-card class="context-card">
-            <header class="context-card__head">
-              <app-icon name="recommend" [size]="20" color="var(--color-primary)" />
-              <h3>Productos sugeridos</h3>
-              <span class="multiplier-tag" style="background:var(--color-secondary)">
-                {{ productsRecommended().length }}
-              </span>
-            </header>
-            <div class="product-list">
-              @for (rec of productsRecommended(); track rec.rank) {
-                <div class="product-rec">
-                  <div class="product-rec__head">
-                    <app-icon
-                      [name]="productIcon(rec.product.type)"
-                      [size]="20"
-                      color="var(--color-primary)"
-                    />
-                    <div class="product-rec__info">
-                      <strong>{{ rec.product.name }}</strong>
-                      <span class="product-rec__role">
-                        {{ rec.role === 'principal' ? 'Oferta principal' : 'Producto complementario' }}
-                      </span>
-                    </div>
-                  </div>
-                  <p class="product-rec__narrative">{{ rec.narrative }}</p>
-                </div>
-              }
-            </div>
-          </app-card>
-        }
 
       </div><!-- /context-stack -->
     </div><!-- /offer-grid -->
