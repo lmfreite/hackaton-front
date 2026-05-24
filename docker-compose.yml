@@ -6,5 +6,5 @@ services:
       args:
         API_BASE_URL: ${API_BASE_URL:-https://api-nexo.stampedev.cloud}
     ports:
-      - "8080:80"
+      - "8090:80"
     restart: unless-stopped
